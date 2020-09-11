@@ -1,4 +1,4 @@
-import {Vec2} from './util.js'
+import {Vec2} from '../util.js'
 
 const width = 640;
 const height = 360;
