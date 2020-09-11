@@ -40,7 +40,11 @@ function draw (points, context, {
     context.stroke();
 }
 
-export function parametric (xFunc, yFunc) {
+function fromPolar (r, theta) {
+    return [r * Math.cos(theta), r * Math.sin(theta)];
+}
+
+export function parametric (xFunc, yFunc, rFunc) {
     return function (start, end, seg = 100, ...args) {
         const points = [];
         for (let i = 0; i <= seg; i++) {
@@ -48,7 +52,11 @@ export function parametric (xFunc, yFunc) {
             const t = start + (end - start) * p;
             const x = xFunc(t, ...args);
             const y = yFunc(t, ...args);
-            points.push([x, y]);
+            if (rFunc) {
+                points.push(rFunc(x, y));
+            } else {
+                points.push([x, y]);
+            }
         }
         return {
             draw: draw.bind(null, points),
@@ -76,6 +84,12 @@ const square = parametric(
     (t) => t,
     (t) => 0.01 * t ** 2
 )
+
+const rose = parametric(
+    (t, a, k) => a * Math.cos(k * t),
+    t => t,
+    fromPolar
+);
 
 function drawQuadircBezier () {
     const p0 = new Vec2(0, 0);
@@ -117,7 +131,8 @@ function drawCubicBezier () {
     }
 }
 
-
 // drawCubicBezier();
 
-square(-100, 100, 100).draw(ctx);
+// square(-100, 100, 100).draw(ctx);
+
+rose(0, Math.PI, 50, 200, 5).draw(ctx);
