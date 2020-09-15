@@ -60,6 +60,8 @@ canvas.onmousemove = function (e) {
  * @param {Vec2} vec 
  */
 function isInScanner (angle, vec) {
+    console.log(new Vec2(0, 1).dot(vec.normalize()), Math.cos(angle / 180 / 2 * Math.PI));
+    return new Vec2(0, 1).dot(vec.normalize()) >= Math.cos(angle / 180 / 2 * Math.PI);
     return Math.abs(new Vec2(0, 1).cross(vec.normalize())) <= Math.sin(angle / 180 / 2 * Math.PI);
 }
 
