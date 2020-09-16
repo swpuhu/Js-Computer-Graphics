@@ -53,7 +53,7 @@ export class Slider {
         this.point.style.cssText = `
             position: absolute;
             top: ${this.height / 2}px; 
-            left: ${Math.floor(this.value / this.range * this.width)}px;
+            left: ${Math.floor((this.value - this.min) / this.range * this.width)}px;
             width: 20px;
             height: 20px; 
             border-radius: 50%; 
@@ -77,11 +77,11 @@ export class Slider {
 
     bindEvent () {
         this.point.onmousedown = (e) => {
-            const initX = Math.floor(this.value / this.range * this.width);
+            const initX = Math.floor((this.value - this.min) / this.range * this.width);
             this.onChangeStart && this.onChangeStart(this.value);
             const move = (ev) => {
                 const offsetX = ev.clientX - e.clientX;
-                this.value = (initX + offsetX) / this.width * this.range;
+                this.value = (initX + offsetX) / this.width * this.range + this.min;
                 this.value = this.value - this.value % this.step
                 if (this.value < this.min) {
                     this.value = this.min;
@@ -89,7 +89,7 @@ export class Slider {
                     this.value = this.max;
                 }
                 this.onChange && this.onChange(this.value);
-                this.point.style.left = Math.floor(this.value / this.range * this.width) + 'px';
+                this.point.style.left = Math.floor((this.value - this.min) / this.range * this.width) + 'px';
             }   
             
             const up = () => {
@@ -111,7 +111,7 @@ export class Slider {
             this.value = this.max;
         }
         this.value = value;
-        this.point.style.left = Math.floor(this.value / this.range * this.width) + 'px';
+        this.point.style.left = Math.floor((this.value - this.min) / this.range * this.width) + 'px';
         this.onChange && this.onChange(this.value);
 
     }

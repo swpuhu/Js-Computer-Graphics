@@ -142,21 +142,21 @@ export class Matrix {
         return this;
     }
 
-    createOrthographMatrix(width, height, depth) {
+    createOrthographMatrix(l, r, t, b, n, f) {
         this.matrix = [
-            2 / width, 0, 0, -1,
-            0, 2 / height, 0, -1,
-            0, 0, 2 / depth, -1,
+            2 / (r - l), 0, 0, (l + r) / (l - r),
+            0, 2 / (t - b), 0, (t + b) / (b - t),
+            0, 0, 2 / (f - n), (n + f) / (n - f),
             0, 0, 0, 1,
         ]
         return this;
     }
 
-    createViewScaleMatrix (width, height, depth) {
+    createViewScaleMatrix (l, r, t, b, n, f) {
         this.matrix = [
-            width / 2, 0, 0, width / 2,
-            0, height / 2, 0, height / 2,
-            0, 0, depth / 2, depth / 2,
+            (r - l) / 2, 0, 0, (l + r) / 2,
+            0, (t - b) / 2, 0, (t + b) / 2,
+            0, 0, (f - n) / 2, (n + f) / 2,
             0, 0, 0, 1
         ]
         return this;

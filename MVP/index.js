@@ -47,22 +47,28 @@ function drawCube(ctx, vertices) {
     ctx.stroke();
 }
 
-let tx = width / 2;
-let ty = 220;
-let tz = 720;
+let tx = 0;
+let ty = 0;
+let tz = 500;
 let rotateX = 0;
 let rotateY = 0;
 let rotateZ = 0;
 const near = 500;
 const far = 1000;
+
+let cameraX = 0;
+let cameraY = 0;
+let cameraZ = 0;
+
+
 const translateMatrix = new Matrix(4).createTranslateMatrix(tx, ty, tz);
 const rotateXMatrix = new Matrix(4).createRotateMatrix(rotateX, 'x');
 const rotateYMatrix = new Matrix(4).createRotateMatrix(rotateY, 'y');
 const rotateZMatrix = new Matrix(4).createRotateMatrix(rotateZ, 'z');
 const perspectiveMatrix = new Matrix(4).createPerspectiveMatrix(near, far);
-const orthographMatrix = new Matrix(4).createOrthographMatrix(width, height, far);
-let viewingMatrix = new Matrix(4, inverse(lookAt([0, 0, -100], [0, 0, 0], [0, 1, 0])));
-const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(width, height, far)
+const orthographMatrix = new Matrix(4).createOrthographMatrix(-width / 2, width / 2, height / 2, -height / 2, near, far);
+let viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
+const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(0, width, height, 0, near, far)
 
 /**
  * 
@@ -191,6 +197,52 @@ rotateZSlider.onChange = (value) => {
 rotateZSlider.mountTo(document.body);
 
 
+const cameraXSlider = new Slider({
+    min: -width / 2,
+    max: width / 2,
+    value: 0,
+    step: 1,
+    labelText: '相机X轴坐标'
+});
+cameraXSlider.onChange = (value) => {
+    cameraX = value;
+    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
+    draw();
+}
+cameraXSlider.mountTo(document.body);
+
+
+const cameraYSlider = new Slider({
+    min: -height / 2,
+    max: height / 2,
+    value: 0,
+    step: 1,
+    labelText: '相机Y轴坐标'
+});
+cameraYSlider.onChange = (value) => {
+    cameraY = value;
+    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
+    draw();
+}
+cameraYSlider.mountTo(document.body);
+
+
+const cameraZSlider = new Slider({
+    min: -near,
+    max: near,
+    value: 0,
+    step: 1,
+    labelText: '相机Z轴坐标'
+});
+cameraZSlider.onChange = (value) => {
+    cameraZ = value;
+    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
+    draw();
+}
+cameraZSlider.mountTo(document.body);
+
+
+
 function update () {
     rotateX += 0.5;
     rotateY += 0.7;
@@ -201,5 +253,5 @@ function update () {
     requestAnimationFrame(update);
 }
 
-// update();
+update();
 
