@@ -15,10 +15,10 @@ export class Matrix {
             this.matrix = new Array(this.size ** 2).fill(0);
             this.identity();
         }
-        
+
     }
 
-    identity () {
+    identity() {
         let count = 0;
         for (let i = 0; i < this.size; i++) {
             this.matrix[i * this.size + count] = 1;
@@ -86,28 +86,79 @@ export class Matrix {
             case 'x':
                 ret = new Float32Array([
                     1.0, 0.0, 0.0, 0.0,
-                    0.0, cos, sin, 0.0,
-                    0.0, -sin, cos, 0.0,
+                    0.0, cos, -sin, 0.0,
+                    0.0, sin, cos, 0.0,
                     0, 0, 0, 1
                 ]);
                 break;
             case 'y':
                 ret = new Float32Array([
-                    cos, 0.0, sin, 0.0,
+                    cos, 0.0, -sin, 0.0,
                     0.0, 1.0, 0.0, 0.0,
-                    -sin, 0.0, cos, 0.0,
+                    sin, 0.0, cos, 0.0,
                     0, 0, 0, 1
                 ]);
                 break;
             default:
                 ret = new Float32Array([
-                    cos, sin, 0.0, 0.0,
-                    -sin, cos, 0.0, 0.0,
+                    cos, -sin, 0.0, 0.0,
+                    sin, cos, 0.0, 0.0,
                     0.0, 0.0, 1.0, 0.0,
                     0, 0, 0, 1
                 ]);
         }
-        return ret;
-        
+        this.matrix = ret;
+        return this;
+    }
+
+    createScaleMatrix(sx, sy, sz) {
+        this.matrix = [
+            sx, 0, 0, 0,
+            0, sy, 0, 0,
+            0, 0, sz, 0,
+            0, 0, 0, 1
+        ];
+        return this;
+    }
+
+    createTranslateMatrix(tx, ty, tz) {
+        this.matrix = [
+            1, 0, 0, tx,
+            0, 1, 0, ty,
+            0, 0, 1, tz,
+            0, 0, 0, 1
+        ];
+        return this;
+    }
+
+
+    createPerspectiveMatrix(near, far) {
+        this.matrix = [
+            near, 0, 0, 0,
+            0, near, 0, 0,
+            0, 0, near + far, -near * far,
+            0, 0, 1, 0
+        ];
+        return this;
+    }
+
+    createOrthographMatrix(width, height, depth) {
+        this.matrix = [
+            2 / width, 0, 0, -1,
+            0, 2 / height, 0, -1,
+            0, 0, 2 / depth, -1,
+            0, 0, 0, 1,
+        ]
+        return this;
+    }
+
+    createViewScaleMatrix (width, height, depth) {
+        this.matrix = [
+            width / 2, 0, 0, width / 2,
+            0, height / 2, 0, height / 2,
+            0, 0, depth / 2, depth / 2,
+            0, 0, 0, 1
+        ]
+        return this;
     }
 }
