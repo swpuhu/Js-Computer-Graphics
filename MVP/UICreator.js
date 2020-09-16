@@ -94,10 +94,11 @@ export class Slider {
             
             const up = () => {
                 this.onChangeEnd && this.onChangeEnd(this.value);
+                this.point.title = this.value;
                 document.removeEventListener('mousemove', move);
                 document.removeEventListener('mouseup', up);
             }
-            this.point.title = this.value;
+            
             document.addEventListener('mousemove', move);
             document.addEventListener('mouseup', up);
         }

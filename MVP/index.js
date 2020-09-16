@@ -1,4 +1,4 @@
-import {Matrix} from './mat4.js';
+import {Matrix, lookAt, inverse} from './mat4.js';
 import {Slider} from './UICreator.js';
 const width = 640;
 const height = 360;
@@ -48,19 +48,20 @@ function drawCube(ctx, vertices) {
 }
 
 let tx = width / 2;
-let ty = height / 2;
-let tz = 900;
+let ty = 220;
+let tz = 720;
 let rotateX = 0;
 let rotateY = 0;
 let rotateZ = 0;
-const near = 800;
-const far = 5000;
+const near = 500;
+const far = 1000;
 const translateMatrix = new Matrix(4).createTranslateMatrix(tx, ty, tz);
 const rotateXMatrix = new Matrix(4).createRotateMatrix(rotateX, 'x');
 const rotateYMatrix = new Matrix(4).createRotateMatrix(rotateY, 'y');
 const rotateZMatrix = new Matrix(4).createRotateMatrix(rotateZ, 'z');
 const perspectiveMatrix = new Matrix(4).createPerspectiveMatrix(near, far);
 const orthographMatrix = new Matrix(4).createOrthographMatrix(width, height, far);
+let viewingMatrix = new Matrix(4, inverse(lookAt([0, 0, -100], [0, 0, 0], [0, 1, 0])));
 const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(width, height, far)
 
 /**
@@ -68,10 +69,14 @@ const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(width, height, far)
  * @param {number[][]} points 
  */
 function transformPoints (points, x, y) {
-    const matrix = viewScaleMatrix.multiple(orthographMatrix).multiple(perspectiveMatrix).multiple(translateMatrix)
-                                    .multiple(rotateXMatrix)
-                                    .multiple(rotateYMatrix)
-                                    .multiple(rotateZMatrix);
+    const matrix = viewScaleMatrix
+    .multiple(orthographMatrix)
+    .multiple(perspectiveMatrix)
+    .multiple(viewingMatrix)
+    .multiple(translateMatrix)
+    .multiple(rotateXMatrix)
+    .multiple(rotateYMatrix)
+    .multiple(rotateZMatrix);
     const res = [];
     for (let i = 0; i < points.length; i++) {
         res.push(matrix.multiVec(points[i]));
@@ -128,7 +133,7 @@ sliderTy.mountTo(document.body);
 
 const sliderTz = new Slider({
     min: 0,
-    max: near + 200,
+    max: far,
     value: tz,
     step: 1,
     labelText: 'Z轴平移距离'
@@ -196,4 +201,5 @@ function update () {
     requestAnimationFrame(update);
 }
 
-update();
+// update();
+
