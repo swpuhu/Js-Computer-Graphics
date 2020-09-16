@@ -1,16 +1,30 @@
-
-class Matrix {
+export class Matrix {
     /**
      * 
      * @param {number} size
      * @param {number[]} matrix 
      */
-    constructor(size, matrix) {
-        if (size ** 2 !== matrix.length) {
-            throw new Error("error size.");
-        }
+    constructor(size = 4, matrix) {
         this.size = size;
-        this.matrix = matrix;
+        if (matrix) {
+            if (size ** 2 !== matrix.length) {
+                throw new Error("error size.");
+            }
+            this.matrix = matrix;
+        } else {
+            this.matrix = new Array(this.size ** 2).fill(0);
+            this.identity();
+        }
+        
+    }
+
+    identity () {
+        let count = 0;
+        for (let i = 0; i < this.size; i++) {
+            this.matrix[i * this.size + count] = 1;
+            count++;
+        }
+        return this;
     }
 
 
@@ -63,17 +77,37 @@ class Matrix {
         }
         return res;
     }
+
+    createRotateMatrix(rotate, axis) {
+        let cos = Math.cos(rotate * Math.PI / 180);
+        let sin = Math.sin(rotate * Math.PI / 180);
+        let ret;
+        switch (axis) {
+            case 'x':
+                ret = new Float32Array([
+                    1.0, 0.0, 0.0, 0.0,
+                    0.0, cos, sin, 0.0,
+                    0.0, -sin, cos, 0.0,
+                    0, 0, 0, 1
+                ]);
+                break;
+            case 'y':
+                ret = new Float32Array([
+                    cos, 0.0, sin, 0.0,
+                    0.0, 1.0, 0.0, 0.0,
+                    -sin, 0.0, cos, 0.0,
+                    0, 0, 0, 1
+                ]);
+                break;
+            default:
+                ret = new Float32Array([
+                    cos, sin, 0.0, 0.0,
+                    -sin, cos, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0, 0, 0, 1
+                ]);
+        }
+        return ret;
+        
+    }
 }
-
-const arr1 = [];
-const arr2 = [];
-for (let i = 0; i < 16; i++) {
-    arr1.push(i);
-    arr2.push(i);
-}
-
-const m = new Matrix(3, [1, 0, 0, 0, 1, 0, 0, 0, 1]);
-const vector = [1, 2, 3];
-
-m.multiVec(vector);
-console.log(m);

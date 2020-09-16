@@ -1,4 +1,4 @@
-export class Vec2 {
+module.exports = class Vec2 {
     constructor (x, y) {
         this.x = x;
         this.y = y;
@@ -42,6 +42,17 @@ export class Vec2 {
         const length = Math.hypot(this.x, this.y);
         this.x /= length;
         this.y /= length;
+        return this;
+    }
+
+    rotate (degree) {
+        const radian = degree * Math.PI / 180;
+        const cos = Math.cos(radian);
+        const sin = Math.sin(radian);
+        const x = this.x * cos - this.y * sin;
+        const y = this.x * sin + this.y * cos;
+        this.x = x;
+        this.y = y;
         return this;
     }
 
