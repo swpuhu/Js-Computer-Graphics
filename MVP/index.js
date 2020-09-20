@@ -95,9 +95,11 @@ function transformPoints (points, x, y) {
 
 
 const points = generateCubeVertex(200, -100);
+ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
 function draw () {
     const newPoints = transformPoints(points);
     ctx.clearRect(0, 0, width, height);
+    // ctx.fillRect(0, 0, width, height);
     drawCube(ctx, newPoints);
 }
 
