@@ -65,7 +65,7 @@ const translateMatrix = new Matrix(4).createTranslateMatrix(tx, ty, tz);
 const rotateXMatrix = new Matrix(4).createRotateMatrix(rotateX, 'x');
 const rotateYMatrix = new Matrix(4).createRotateMatrix(rotateY, 'y');
 const rotateZMatrix = new Matrix(4).createRotateMatrix(rotateZ, 'z');
-const perspectiveMatrix = new Matrix(4).createPerspectiveMatrix(near, far);
+const perspectiveMatrix = new Matrix(4).createPerspectiveMatrix(near, far, width / 2, height / 2);
 const orthographMatrix = new Matrix(4).createOrthographMatrix(-width / 2, width / 2, height / 2, -height / 2, near, far);
 let viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
 const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(0, width, height, 0, near, far)
@@ -75,7 +75,10 @@ const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(0, width, height, 0,
  * @param {number[][]} points 
  */
 function transformPoints (points, x, y) {
-    const matrix = translateMatrix
+    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [0, 0, tz], [0, 1, 0])));
+    const matrix = perspectiveMatrix
+    .multiple(viewingMatrix)
+    .multiple(translateMatrix)
     .multiple(rotateXMatrix)
     .multiple(rotateYMatrix)
     .multiple(rotateZMatrix);
@@ -105,7 +108,7 @@ draw();
 
 
 const sliderTx = new Slider({
-    min: 0,
+    min: -width,
     max: width,
     value: tx,
     step: 1,
@@ -121,7 +124,7 @@ sliderTx.mountTo(document.body);
 
 
 const sliderTy = new Slider({
-    min: 0,
+    min: -height,
     max: height,
     value: ty,
     step: 1,
@@ -204,7 +207,6 @@ const cameraXSlider = new Slider({
 });
 cameraXSlider.onChange = (value) => {
     cameraX = value;
-    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
     draw();
 }
 cameraXSlider.mountTo(document.body);
@@ -219,7 +221,6 @@ const cameraYSlider = new Slider({
 });
 cameraYSlider.onChange = (value) => {
     cameraY = value;
-    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
     draw();
 }
 cameraYSlider.mountTo(document.body);
@@ -234,7 +235,6 @@ const cameraZSlider = new Slider({
 });
 cameraZSlider.onChange = (value) => {
     cameraZ = value;
-    viewingMatrix = new Matrix(4, inverse(lookAt([cameraX, cameraY, cameraZ], [tx, ty, tz], [0, 1, 0])));
     draw();
 }
 cameraZSlider.mountTo(document.body);

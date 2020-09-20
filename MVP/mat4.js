@@ -132,10 +132,10 @@ export class Matrix {
     }
 
 
-    createPerspectiveMatrix(near, far) {
+    createPerspectiveMatrix(near, far, Ox = 0, Oy = 0) {
         this.matrix = [
-            near, 0, 0, 0,
-            0, near, 0, 0,
+            near, 0, Ox, -near * Ox,
+            0, near, Oy, -near * Oy,
             0, 0, near + far, -near * far,
             0, 0, 1, 0
         ];
