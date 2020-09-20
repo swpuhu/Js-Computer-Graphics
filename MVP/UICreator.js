@@ -1,13 +1,74 @@
-export class Slider {
-    constructor ({
+/**
+ * 
+ * @param {Array} arr 
+ * @param {number} index 
+ */
+function fastRemove(arr, index) {
+    arr[index] = arr[arr.length - 1];
+    arr.pop();
+}
+
+class BaseUI {
+    constructor() {
+        this.eventList = {};
+        this.name = 'BaseUI';
+    }
+
+    /**
+     * 
+     * @param {string} name 
+     * @param {Function} fn
+     * @param {Object} target
+     */
+    on(name, fn, target) {
+        if (!this.eventList[name]) {
+            this.eventList[name] = [];
+        }
+        this.eventList[name].push({
+            target: target,
+            fn: fn
+        });
+    }
+
+
+    /**
+     * 
+     * @param {string} name 
+     * @param {Function} fn
+     */
+    off(name, fn) {
+        if (!this.eventList[name]) {
+            return;
+        }
+        let index = this.eventList[name].findIndex(item => item.fn === fn);
+        if (index > -1) {
+            fastRemove(this.eventList[name], index);
+        }
+    }
+
+    dispatch(name, ...args) {
+        if (!this.eventList[name]) {
+            return;
+        }
+        let funcs = this.eventList[name];
+        for (let i = 0; i < funcs.length; i++) {
+            funcs[i].fn.apply(funcs[i].target || this, args);
+        }
+    }
+}
+
+export class Slider extends BaseUI {
+    constructor({
         min: min,
         max: max,
         value: value = 0,
         step: step = 1,
         width: width = 200,
         height: height = 5,
-        labelText: labelText
+        labelText: labelText,
+        indicator: indicator = true
     }) {
+        super();
         this.min = min;
         this.max = max;
         this.range = max - min;
@@ -16,41 +77,44 @@ export class Slider {
         this.width = width;
         this.height = height;
         this.labelText = labelText;
+        this.indicator = indicator;
 
 
-        this.sliderRoot = null;
-        this.root = null;
-        this.slider = null;
-        this.point = null;
-        this.label = null;
+        this.sliderRootDom = null;
+        this.rootDom = null;
+        this.sliderDom = null;
+        this.pointDom = null;
+        this.labelDom = null;
+        this.indicatorDom = null;
 
         this.onChange = null;
         this.onChangeStart = null;
         this.onChangeEnd = null;
         this.init();
+        
     }
 
-    init () {
+    init() {
         this.createDOM();
         this.bindEvent();
     }
 
-    createDOM () {
+    createDOM() {
 
-        this.root = document.createElement('div');
-        this.root.style.cssText = `
+        this.rootDom = document.createElement('div');
+        this.rootDom.style.cssText = `
             display: flex;
             align-items: center;
         `
 
-        this.sliderRoot = document.createElement('div');
-        this.sliderRoot.style.cssText = `position: relative;width: ${this.width}px;height: ${this.height}px`
+        this.sliderRootDom = document.createElement('div');
+        this.sliderRootDom.style.cssText = `position: relative;width: ${this.width}px;height: ${this.height}px`
 
-        this.slider = document.createElement('div');
-        this.slider.style.cssText = `position: absolute; width: 100%;height: 100%; background: #ffdcb8`;
+        this.sliderDom = document.createElement('div');
+        this.sliderDom.style.cssText = `position: absolute; width: 100%;height: 100%; background: #ffdcb8`;
 
-        this.point = document.createElement('div');
-        this.point.style.cssText = `
+        this.pointDom = document.createElement('div');
+        this.pointDom.style.cssText = `
             position: absolute;
             top: ${this.height / 2}px; 
             left: ${Math.floor((this.value - this.min) / this.range * this.width)}px;
@@ -63,20 +127,31 @@ export class Slider {
 
 
         if (this.labelText) {
-            this.label = document.createElement('div');
-            this.label.style.cssText = `margin: 0 10px`
-            this.label.textContent = this.labelText;
-            this.root.appendChild(this.label);
+            this.labelDom = document.createElement('div');
+            this.labelDom.style.cssText = `margin: 0 10px`
+            this.labelDom.textContent = this.labelText;
+            this.rootDom.appendChild(this.labelDom);
         }
 
-        this.sliderRoot.appendChild(this.slider);
-        this.sliderRoot.appendChild(this.point);
+        this.sliderRootDom.appendChild(this.sliderDom);
+        this.sliderRootDom.appendChild(this.pointDom);
 
-        this.root.appendChild(this.sliderRoot);
+        this.rootDom.appendChild(this.sliderRootDom);
+
+
+        if (this.indicator) {
+            this.indicatorDom = document.createElement('div');
+            this.indicatorDom.style.cssText = `margin: 0 10px`;
+            this.indicatorDom.textContent = this.value;
+            this.on('_change', function (value) {
+                this.indicatorDom.textContent = value;
+            });
+            this.rootDom.appendChild(this.indicatorDom);
+        }
     }
 
-    bindEvent () {
-        this.point.onmousedown = (e) => {
+    bindEvent() {
+        this.pointDom.onmousedown = (e) => {
             const initX = Math.floor((this.value - this.min) / this.range * this.width);
             this.onChangeStart && this.onChangeStart(this.value);
             const move = (ev) => {
@@ -89,29 +164,30 @@ export class Slider {
                     this.value = this.max;
                 }
                 this.onChange && this.onChange(this.value);
-                this.point.style.left = Math.floor((this.value - this.min) / this.range * this.width) + 'px';
-            }   
-            
+                this.dispatch('_change', this.value);
+                this.pointDom.style.left = Math.floor((this.value - this.min) / this.range * this.width) + 'px';
+            }
+
             const up = () => {
                 this.onChangeEnd && this.onChangeEnd(this.value);
-                this.point.title = this.value;
+                this.pointDom.title = this.value;
                 document.removeEventListener('mousemove', move);
                 document.removeEventListener('mouseup', up);
             }
-            
+
             document.addEventListener('mousemove', move);
             document.addEventListener('mouseup', up);
         }
     }
 
-    setValue (value) {
+    setValue(value) {
         if (value < this.min) {
             this.value = this.min;
         } else if (value > this.max) {
             this.value = this.max;
         }
         this.value = value;
-        this.point.style.left = Math.floor((this.value - this.min) / this.range * this.width) + 'px';
+        this.pointDom.style.left = Math.floor((this.value - this.min) / this.range * this.width) + 'px';
         this.onChange && this.onChange(this.value);
 
     }
@@ -120,8 +196,8 @@ export class Slider {
      * 
      * @param {HTMLElement} dom 
      */
-    mountTo (dom) {
-        dom.appendChild(this.root);
+    mountTo(dom) {
+        dom.appendChild(this.rootDom);
     }
 
 

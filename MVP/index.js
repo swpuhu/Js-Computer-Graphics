@@ -75,11 +75,7 @@ const viewScaleMatrix = new Matrix(4).createViewScaleMatrix(0, width, height, 0,
  * @param {number[][]} points 
  */
 function transformPoints (points, x, y) {
-    const matrix = viewScaleMatrix
-    .multiple(orthographMatrix)
-    .multiple(perspectiveMatrix)
-    .multiple(viewingMatrix)
-    .multiple(translateMatrix)
+    const matrix = translateMatrix
     .multiple(rotateXMatrix)
     .multiple(rotateYMatrix)
     .multiple(rotateZMatrix);
@@ -255,5 +251,5 @@ function update () {
     requestAnimationFrame(update);
 }
 
-update();
+// update();
 
