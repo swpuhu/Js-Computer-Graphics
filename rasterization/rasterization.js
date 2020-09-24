@@ -1,5 +1,6 @@
 import { Vec2 } from '../util/Vec.js';
 import { PrimitiveTriangle } from '../util/Triangle.js';
+import { Input } from '../MVP/UICreator.js';
 const width = 640;
 const height = 360;
 
@@ -8,7 +9,7 @@ document.body.appendChild(canvas);
 canvas.width = width;
 canvas.height = height;
 const ctx = canvas.getContext('2d');
-ctx.fillStyle = '#69d1ff';
+ctx.fillStyle = '#cf390a';
 
 const convertCoordinate = (l, r, t, b, nl, nr, nt, nb) => {
     return function (points) {
@@ -23,20 +24,23 @@ const convertCoordinate = (l, r, t, b, nl, nr, nt, nb) => {
     }
 }
 
+let pixelWidth = 5;
+let pixelHeight = 5;
 
-const onePixelSize = [10, 10];
-const w = width / onePixelSize[0];
-const h = height / onePixelSize[1];
-const convert = convertCoordinate(-1, 1, 1, -1, 0, w, 0, h);
+let onePixelSize = [pixelWidth, pixelHeight];
+let w = width / onePixelSize[0];
+let h = height / onePixelSize[1];
+let convert = convertCoordinate(-1, 1, 1, -1, 0, w, 0, h);
+let msaaNum = 1;
 
-const trianglePoints = [
+let trianglePoints = [
     -0.5, 0.5,
-    0.8, 0.8,
-    0.2, -0.7
+    -0.2, -0.9,
+    0.8, -0.2
 ]
 
 convert(trianglePoints);
-const triangle = new PrimitiveTriangle(...trianglePoints);
+let triangle = new PrimitiveTriangle(...trianglePoints);
 
 function parseFillStyle(style, weight) {
     if (style.length === 7) {
@@ -118,10 +122,24 @@ function msaa(x, y, sampleNumX, sampleNumY) {
     return res;
 }
 
-function rasterization(points) {
+function rasterization() {
+    ctx.clearRect(0, 0, width, height);
+    onePixelSize = [pixelWidth, pixelHeight];
+    w = width / onePixelSize[0];
+    h = height / onePixelSize[1];
+    convert = convertCoordinate(-1, 1, 1, -1, 0, w, 0, h);
+    trianglePoints = [
+        -0.5, 0.5,
+        -0.2, -0.9,
+        0.8, -0.2
+    ]
+    
+    convert(trianglePoints);
+    triangle = new PrimitiveTriangle(...trianglePoints);
+
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            const weight = msaa(x, y, 3, 3);
+            const weight = msaa(x, y, msaaNum, msaaNum);
             if (weight > 0) {
                 fillPixel(x, y, weight);
             }
@@ -131,3 +149,30 @@ function rasterization(points) {
 
 
 rasterization(trianglePoints);
+
+const pixelSizeInput = new Input({
+    label: '像素大小',
+    value: pixelWidth
+});
+
+
+pixelSizeInput.on('change', (value) => {
+    pixelWidth = pixelHeight = value;
+    value && rasterization();
+});
+
+pixelSizeInput.mountTo(document.body);
+
+
+const msaaInput = new Input({
+    label: 'MSAA采样大小',
+    value: msaaNum
+});
+
+
+msaaInput.on('change', (value) => {
+    msaaNum = value;
+    value && rasterization();
+});
+
+msaaInput.mountTo(document.body);

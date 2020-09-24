@@ -199,6 +199,55 @@ export class Slider extends BaseUI {
     mountTo(dom) {
         dom.appendChild(this.rootDom);
     }
+}
 
+
+export class Input extends BaseUI {
+    constructor ({
+        label: label = '',
+        type: type = 'text',
+        value: value = 0
+    }) {
+        super();
+        this.label = label;
+        this.type = type;
+        this.value = value;
+        this.rootDom = null;
+        this.labelDom = null;
+        this.input = null;
+        this.init();
+    }
+
+    init () {
+        this.createDOM();
+        this.bindEvent();
+    }
+
+    createDOM() {
+        this.rootDom = document.createElement('div');
+        this.rootDom.style.cssText = `display: flex`;
+
+        this.labelDom = document.createElement('div');
+        this.labelDom.textContent = this.label;
+
+        this.input = document.createElement('input');
+        this.input.type = this.type;
+        this.input.value = this.value;
+        
+        this.rootDom.appendChild(this.labelDom);
+        this.rootDom.appendChild(this.input);
+    }
+
+    bindEvent() {
+        this.input.oninput = () => {
+            this.value = this.input.value;
+            this.dispatch('change', this.value);
+        }
+    }
+
+
+    mountTo(dom) {
+        dom.appendChild(this.rootDom);
+    }
 
 }
