@@ -24,15 +24,15 @@ const convertCoordinate = (l, r, t, b, nl, nr, nt, nb) => {
 }
 
 
-const onePixelSize = [5, 5];
+const onePixelSize = [10, 10];
 const w = width / onePixelSize[0];
 const h = height / onePixelSize[1];
 const convert = convertCoordinate(-1, 1, 1, -1, 0, w, 0, h);
 
 const trianglePoints = [
-    -0.5, -0.5,
-    0.5, -0.5,
-    0.0, 0.5
+    -0.5, 0.5,
+    0.8, 0.8,
+    0.2, -0.7
 ]
 
 convert(trianglePoints);
@@ -121,7 +121,7 @@ function msaa(x, y, sampleNumX, sampleNumY) {
 function rasterization(points) {
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-            const weight = msaa(x, y, 1, 1)
+            const weight = msaa(x, y, 3, 3);
             if (weight > 0) {
                 fillPixel(x, y, weight);
             }
