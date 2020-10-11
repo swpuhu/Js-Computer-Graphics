@@ -121,6 +121,46 @@ export class Matrix {
         return this;
     }
 
+
+    createRotateMatrix3(rotate, axis) {
+        let cos = Math.cos(rotate * Math.PI / 180);
+        let sin = Math.sin(rotate * Math.PI / 180);
+        let ret;
+        switch (axis) {
+            case 'x':
+                ret = new Float32Array([
+                    1.0, 0.0, 0.0,
+                    0.0, cos, -sin,
+                    0.0, sin, cos,
+                ]);
+                break;
+            case 'y':
+                ret = new Float32Array([
+                    cos, 0.0, -sin,
+                    0.0, 1.0, 0.0,
+                    sin, 0.0, cos,
+                ]);
+                break;
+            default:
+                ret = new Float32Array([
+                    cos, -sin, 0.0,
+                    sin, cos, 0.0, 
+                    0.0, 0.0, 1.0, 
+                ]);
+        }
+        this.matrix = ret;
+        return this;
+    }
+
+    createScaleMatrix3(sx, sy, sz) {
+        this.matrix = [
+            sx, 0, 0,
+            0, sy, 0,
+            0, 0, sz,
+        ];
+        return this;
+    }
+
     createTranslateMatrix(tx, ty, tz) {
         this.matrix = [
             1, 0, 0, tx,

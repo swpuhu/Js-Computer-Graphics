@@ -75,7 +75,7 @@ const quadricBezier = parametric(
     (t, [{y: y0}, {y: y1}, {y: y2}]) => (1 - t) ** 2 * y0 + 2 * (1 - t) * t * y1 + t ** 2 * y2,
 );
 
-const cubicBezier = parametric(
+export const cubicBezier = parametric(
     (t, [{x: x0}, {x: x1}, {x: x2}, {x: x3}]) => (1 - t) ** 3 * x0 + 3 * (1 - t) ** 2 * t * x1 + 3 * (1 - t) * t ** 2 * x2 + t ** 3 * x3,
     (t, [{y: y0}, {y: y1}, {y: y2}, {y: y3}]) => (1 - t) ** 3 * y0 + 3 * (1 - t) ** 2 * t * y1 + 3 * (1 - t) * t ** 2 * y2 + t ** 3 * y3
 )
@@ -135,4 +135,4 @@ function drawCubicBezier () {
 
 // square(-100, 100, 100).draw(ctx);
 
-rose(0, Math.PI, 50, 200, 5).draw(ctx);
+// rose(0, Math.PI, 50, 200, 5).draw(ctx);
