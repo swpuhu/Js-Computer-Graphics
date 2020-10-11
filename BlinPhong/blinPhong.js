@@ -219,7 +219,7 @@ let attribs = {
         numComponents: 3
     }
 }
-
+gl.vertexAttribPointer()
 
 function draw() {
     uniforms.u_rotateX = util.createRotateMatrix(axis, rotateX, 'x'),
