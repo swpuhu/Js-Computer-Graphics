@@ -41,7 +41,17 @@ export class Triangle {
         this.color[ind] = [r / 255, g / 255, b / 255];
     }
 
-    getColor () {
+    getColor (alpha, beta, gamma) {
+        if (alpha !== undefined) {
+            const color1 = this.color[0].map(item => item * 255 * alpha);
+            const color2 = this.color[1].map(item => item * 255 * beta);
+            const color3 = this.color[2].map(item => item * 255 * gamma);
+            return [
+                color1[0] + color2[0] + color3[0],
+                color1[1] + color2[1] + color3[1],
+                color1[2] + color2[2] + color3[2],
+            ]
+        }
         return this.color[0].map(item => item * 255);
     }
 

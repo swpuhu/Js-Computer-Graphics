@@ -1,21 +1,21 @@
-import {Matrix} from '../MVP/mat4.js';
-import {Triangle} from './Triangle.js';
-import {Vec2} from '../util/Vec.js';
+import { Matrix } from "../MVP/mat4.js";
+import { Triangle } from "./Triangle.js";
+import { Vec2 } from "../util/Vec.js";
 export const Enum_Buffers = {
     colorBuffer: 1,
-    depthBuffer: 2
-}
+    depthBuffer: 2,
+};
 
 export const PrimitiveType = {
-    TRIANGLE: Symbol('Triangle')
-}
+    TRIANGLE: Symbol("Triangle"),
+};
 
 export class Rasterizer {
     /**
-     * 
-     * @param {CanvasRenderingContext2D} ctx 
+     *
+     * @param {CanvasRenderingContext2D} ctx
      */
-    constructor (ctx) {
+    constructor(ctx) {
         this._width = ctx.canvas.width;
         this._height = ctx.canvas.height;
         this._nextId = 0;
@@ -32,23 +32,23 @@ export class Rasterizer {
         this._depthBuf = [];
     }
 
-    getNextId () {
+    getNextId() {
         return this._nextId++;
     }
 
     /**
-     * 
-     * @param {number[][]} positions 
+     *
+     * @param {number[][]} positions
      */
-    loadPositions (positions) {
+    loadPositions(positions) {
         const id = this.getNextId();
         this._posBuf[id] = positions;
         return id;
     }
 
     /**
-     * 
-     * @param {number[][]} indices 
+     *
+     * @param {number[][]} indices
      */
     loadIndices(indices) {
         const id = this.getNextId();
@@ -57,8 +57,8 @@ export class Rasterizer {
     }
 
     /**
-     * 
-     * @param {number[][]} colors 
+     *
+     * @param {number[][]} colors
      */
     loadColors(colors) {
         const id = this.getNextId();
@@ -67,13 +67,13 @@ export class Rasterizer {
     }
 
     /**
-     * 
-     * @param {number[]} v 
-     * @param {number} w 
+     *
+     * @param {number[]} v
+     * @param {number} w
      */
     toVec4(v, w = 1) {
         return [...v, w];
-    }   
+    }
 
     insideTriangle(x, y, v) {
         const [p1, p2, p3] = v;
@@ -86,28 +86,56 @@ export class Rasterizer {
         const c1 = v1.cross(pv1);
         const c2 = v2.cross(pv2);
         const c3 = v3.cross(pv3);
-        return (c1 >= 0 && c2 >= 0 && c3 >= 0) || (c1 <= 0 && c2 <= 0 && c3 <= 0);
-
+        return (
+            (c1 >= 0 && c2 >= 0 && c3 >= 0) || (c1 <= 0 && c2 <= 0 && c3 <= 0)
+        );
     }
 
     /**
-     * 
-     * @param {number} x 
-     * @param {number} y 
-     * @param {number[][]} v 
+     *
+     * @param {number} x
+     * @param {number} y
+     * @param {number[][]} v
      */
     computeBaryCentric2D(x, y, v) {
-
+        const c1 =
+            (x * (v[1][1] - v[2][1]) +
+                (v[2][0] - v[1][0]) * y +
+                v[1][0] * v[2][1] -
+                v[2][0] * v[1][1]) /
+            (v[0][0] * (v[1][1] - v[2][1]) +
+                (v[2][0] - v[1][0]) * v[0][1] +
+                v[1][0] * v[2][1] -
+                v[2][0] * v[1][1]);
+        const c2 =
+            (x * (v[2][1] - v[0][1]) +
+                (v[0][0] - v[2][0]) * y +
+                v[2][0] * v[0][1] -
+                v[0][0] * v[2][1]) /
+            (v[1][0] * (v[2][1] - v[0][1]) +
+                (v[0][0] - v[2][0]) * v[1][1] +
+                v[2][0] * v[0][1] -
+                v[0][0] * v[2][1]);
+        const c3 =
+            (x * (v[0][1] - v[1][1]) +
+                (v[1][0] - v[0][0]) * y +
+                v[0][0] * v[1][1] -
+                v[1][0] * v[0][1]) /
+            (v[2][0] * (v[0][1] - v[1][1]) +
+                (v[1][0] - v[0][0]) * v[2][1] +
+                v[0][0] * v[1][1] -
+                v[1][0] * v[0][1]);
+        return [c1, c2, c3];
     }
 
     /**
-     * 
-     * @param {number} posBuffer 
-     * @param {number} indBuffer 
-     * @param {number} colBuffer 
-     * @param {keyof PrimitiveType} type 
+     *
+     * @param {number} posBuffer
+     * @param {number} indBuffer
+     * @param {number} colBuffer
+     * @param {keyof PrimitiveType} type
      */
-    draw (posBuffer, indBuffer, colBuffer, type) {
+    draw(posBuffer, indBuffer, colBuffer, type) {
         const buf = this._posBuf[posBuffer];
         const ind = this._indBuf[indBuffer];
         const col = this._colBuf[colBuffer];
@@ -131,8 +159,8 @@ export class Rasterizer {
             }
 
             for (let vert of v) {
-                vert[0] = 0.5 * this._width * (vert[0] + 1.);
-                vert[1] = 0.5 * this._height * (vert[1] + 1.);
+                vert[0] = 0.5 * this._width * (vert[0] + 1);
+                vert[1] = 0.5 * this._height * (vert[1] + 1);
                 vert[2] = vert[2] * f1 + f2;
             }
 
@@ -141,56 +169,53 @@ export class Rasterizer {
             t.setVertex(2, v[2]);
 
             t.setColor(0, col[0][0], col[0][1], col[0][2]);
-            t.setColor(0, col[1][0], col[1][1], col[1][2]);
-            t.setColor(0, col[2][0], col[2][1], col[2][2]);
+            t.setColor(1, col[1][0], col[1][1], col[1][2]);
+            t.setColor(2, col[2][0], col[2][1], col[2][2]);
 
             this._rasterizeTriangle(t);
         }
     }
 
-
     /**
      * @param {Matrix} m
      */
-    setModel (m) {
+    setModel(m) {
         this._model = m;
     }
 
-
     /**
-     * 
-     * @param {Matrix} v 
+     *
+     * @param {Matrix} v
      */
-    setView (v) {
+    setView(v) {
         this._view = v;
     }
 
-
     /**
-     * 
+     *
      * @param {Matrix} p
      */
-    setProjection (p) {
+    setProjection(p) {
         this._projection = p;
     }
 
     /**
-     * 
-     * @param {number[]} point 
-     * @param {number[]} color 
+     *
+     * @param {number[]} point
+     * @param {number[]} color
      */
     setPixel(point, color) {
         let ind = (this._height - 1 - point[1]) * this._width + point[0];
         this._frameBuf[ind] = color;
     }
 
-    clear (buff) {
-        if (buff & Enum_Buffers.colorBuffer === Enum_Buffers.colorBuffer) {
+    clear(buff) {
+        if (buff & (Enum_Buffers.colorBuffer === Enum_Buffers.colorBuffer)) {
             for (let i = 0; i < this._frameBuf.length; i++) {
                 this._frameBuf[i] = [0, 0, 0];
             }
         }
-        if (buff & Enum_Buffers.depthBuffer === Enum_Buffers.depthBuffer) {
+        if (buff & (Enum_Buffers.depthBuffer === Enum_Buffers.depthBuffer)) {
             this._depthBuf.fill(Infinity);
         }
     }
@@ -207,25 +232,19 @@ export class Rasterizer {
         return res;
     }
 
-
-
     /**
-     * 
-     * @param {number[]} begin 
-     * @param {number[]} end 
+     *
+     * @param {number[]} begin
+     * @param {number[]} end
      */
-    _drawLine (begin, end) {
-
-    }
+    _drawLine(begin, end) {}
 
     /**
-     * 
-     * @param {Triangle} t 
+     *
+     * @param {Triangle} t
      */
     _rasterizeTriangle(t) {
         const p1 = t.v[0];
-        const p2 = t.v[1];
-        const p3 = t.v[2];
 
         let xMin, xMax, yMin, yMax;
         xMin = xMax = p1[0];
@@ -257,7 +276,8 @@ export class Rasterizer {
         for (let y = yMin; y <= yMax; y++) {
             for (let x = xMin; x <= xMax; x++) {
                 if (this.insideTriangle(x, y, t.v)) {
-                    const color = t.getColor();
+                    const [alpha, beta, gamma] = this.computeBaryCentric2D(x, y, t.v);
+                    const color = t.getColor(alpha, beta, gamma);
                     this.setPixel([x, y, 1], color);
                 }
             }
