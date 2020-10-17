@@ -33,6 +33,7 @@ function getProjection(eyeFov, aspect, zNear, zFar) {
     ]);
 }
 
+
 function main () {
     const r = new Rasterizer(ctx);
     const eyePos = [0, 0, 5];
