@@ -25,7 +25,8 @@ export class Rasterizer {
         this._model = new Matrix(4);
         this._view = new Matrix(4);
         this._projection = new Matrix(4);
-        this._frameBuf = new Array(700 * 700);
+        this._frameBuf = new Array(this._width * this._height);
+        this._zBuffer = new Array(this._width * this._height).fill(Infinity);
         for (let i = 0; i < this._frameBuf.length; i++) {
             this._frameBuf[i] = [0, 0, 0];
         }
@@ -89,6 +90,20 @@ export class Rasterizer {
         return (
             (c1 >= 0 && c2 >= 0 && c3 >= 0) || (c1 <= 0 && c2 <= 0 && c3 <= 0)
         );
+    }
+
+    msaa(x, y, v, msaaNum = 3) {
+        const half = Math.floor(msaaNum / 2);
+        const total = msaaNum ** 2;
+        let sum = 0;
+        for (let _y = -half; _y <= half; _y++) {
+            for (let _x = -half; _x <= half; _x++) {
+                if (this.insideTriangle(x + _x, y + _y, v)) {
+                    sum++;
+                }
+            }
+        }
+        return sum / total;
     }
 
     /**
@@ -168,11 +183,11 @@ export class Rasterizer {
             t.setVertex(1, v[1]);
             t.setVertex(2, v[2]);
 
-            t.setColor(0, col[0][0], col[0][1], col[0][2]);
-            t.setColor(1, col[1][0], col[1][1], col[1][2]);
-            t.setColor(2, col[2][0], col[2][1], col[2][2]);
+            t.setColor(0, col[index[0]][0], col[index[0]][1], col[index[0]][2]);
+            t.setColor(1, col[index[1]][0], col[index[1]][1], col[index[1]][2]);
+            t.setColor(2, col[index[2]][0], col[index[2]][1], col[index[2]][2]);
 
-            this._rasterizeTriangle(t);
+            this._rasterizeTriangle(t, true, 3);
         }
     }
 
@@ -206,7 +221,10 @@ export class Rasterizer {
      */
     setPixel(point, color) {
         let ind = (this._height - 1 - point[1]) * this._width + point[0];
-        this._frameBuf[ind] = color;
+        if (point[2] < this._zBuffer[ind]) {
+            this._zBuffer[ind] = point[2];
+            this._frameBuf[ind] = color;
+        }
     }
 
     clear(buff) {
@@ -227,7 +245,7 @@ export class Rasterizer {
             res.data[i * 4] = data[0];
             res.data[i * 4 + 1] = data[1];
             res.data[i * 4 + 2] = data[2];
-            res.data[i * 4 + 3] = 255;
+            res.data[i * 4 + 3] = data[3] || 255;
         }
         return res;
     }
@@ -243,7 +261,7 @@ export class Rasterizer {
      *
      * @param {Triangle} t
      */
-    _rasterizeTriangle(t) {
+    _rasterizeTriangle(t, msaa = false, msaaNum = 3) {
         const p1 = t.v[0];
 
         let xMin, xMax, yMin, yMax;
@@ -275,10 +293,62 @@ export class Rasterizer {
 
         for (let y = yMin; y <= yMax; y++) {
             for (let x = xMin; x <= xMax; x++) {
-                if (this.insideTriangle(x, y, t.v)) {
-                    const [alpha, beta, gamma] = this.computeBaryCentric2D(x, y, t.v);
-                    const color = t.getColor(alpha, beta, gamma);
-                    this.setPixel([x, y, 1], color);
+                if (msaa) {
+                    const half = Math.floor(msaaNum / 2);
+                    const total = msaaNum ** 2;
+                    let sum = 0;
+                    let sumColor = [0, 0, 0];
+                    const [
+                        alpha,
+                        beta,
+                        gamma,
+                    ] = this.computeBaryCentric2D(x, y, t.v);
+                    const zReciprocal =
+                        alpha / t.v[0][2] +
+                        beta / t.v[1][2] +
+                        gamma / t.v[2][2];
+                    let color = t.getColor(
+                        alpha,
+                        beta,
+                        gamma,
+                        zReciprocal,
+                        true
+                    );
+                    for (let _y = -half; _y <= half; _y++) {
+                        for (let _x = -half; _x <= half; _x++) {
+                            const __x = x + _x / msaaNum;
+                            const __y = y + _y / msaaNum;
+                            if (this.insideTriangle(__x, __y, t.v)) {
+                                sum++;
+                            }
+                        }
+                    }
+                    const weight = sum / total;
+                    if (weight > 0) {
+                        color = color.map(item => item * weight);
+                        this.setPixel([x, y, 1 / zReciprocal], color);
+                    }
+                    
+                } else {
+                    if (this.insideTriangle(x, y, t.v)) {
+                        const [alpha, beta, gamma] = this.computeBaryCentric2D(
+                            x,
+                            y,
+                            t.v
+                        );
+                        const zReciprocal =
+                            alpha / t.v[0][2] +
+                            beta / t.v[1][2] +
+                            gamma / t.v[2][2];
+                        const color = t.getColor(
+                            alpha,
+                            beta,
+                            gamma,
+                            zReciprocal,
+                            true
+                        );
+                        this.setPixel([x, y, 1 / zReciprocal], color);
+                    }
                 }
             }
         }

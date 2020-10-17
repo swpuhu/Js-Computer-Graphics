@@ -38,12 +38,12 @@ function main () {
     const eyePos = [0, 0, 5];
 
     const pos = [
-        [2, 0, -2],
-        [0, 2, -2],
-        [-2, 0, -2],
-        [3.5, -1, -5],
-        [2.5, 1.5, -5],
-        [-1, 0.5, -5]
+        [2.8, 0, -3],
+        [0, 2, -6],
+        [-2, 0, -6],
+        [2.5, -1, -5],
+        [2.5, 2.5, -5],
+        [-2, 0.5, -5]
     ];
 
     const ind = [
@@ -52,9 +52,9 @@ function main () {
     ];
 
     const cols = [
-        [255, 0, 0],
-        [0, 255, 0],
-        [0, 0, 255],
+        [255, 255, 0],
+        [0, 255, 255],
+        [255, 0, 255],
         [255, 0, 0],
         [0, 255, 0],
         [0, 0, 255],
@@ -65,15 +65,23 @@ function main () {
     const colId = r.loadColors(cols);
 
     let frameCount = 0;
-    r.clear(Enum_Buffers.colorBuffer | Enum_Buffers.depthBuffer);
-    r.setModel(getModelMatrix());
-    r.setView(getViewMatrix(eyePos));
-    r.setProjection(getProjection(45, 1, 0.1, 50));
-
-    r.draw(posId, indId, colId, PrimitiveType.TRIANGLE);
-    const imageData = r.getFramebuffer();
-
-    ctx.putImageData(imageData, 0, 0);
+    let startTime = Date.now();
+    const mainLoop = () => {
+        r.clear(Enum_Buffers.colorBuffer | Enum_Buffers.depthBuffer);
+        r.setModel(getModelMatrix());
+        r.setView(getViewMatrix(eyePos));
+        r.setProjection(getProjection(45, 1, 0.1, 50));
+    
+        r.draw(posId, indId, colId, PrimitiveType.TRIANGLE);
+        const imageData = r.getFramebuffer();
+        const nowTime = Date.now();
+        ctx.putImageData(imageData, 0, 0);
+        frameCount++;
+        // console.log('frame count: ' + frameCount++);
+        console.log('frame rate: ' + frameCount / (nowTime - startTime) * 1000);
+        // requestAnimationFrame(mainLoop);
+    }
+    mainLoop();
 }
 
 main();

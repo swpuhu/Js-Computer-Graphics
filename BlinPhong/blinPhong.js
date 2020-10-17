@@ -13,7 +13,8 @@ canvas.height = height;
 document.body.appendChild(canvas);
 canvas.style.border = '1px solid #ccc';
 
-const seg = 100;
+const rotateSeg = 300;
+const curveSeg = 300;
 const start = 0;
 const end = 360;
 const circle = parametric(
@@ -22,7 +23,7 @@ const circle = parametric(
 )
 
 // gl.translate(width / 2, height / 2);
-let { points } = circle(-Math.PI / 2, Math.PI / 2, 100, 150);
+let { points } = circle(-Math.PI / 2, Math.PI / 2, curveSeg, 150);
 // points = cubicBezier(0, 1, 100, [{x: 0, y: -100}, {x: 100, y: -50}, {x: 100, y: 50}, {x: 0, y: 100}]).points;
 const axis = { x: 0, y: 0, z: near };
 // 增加z坐标
@@ -33,9 +34,9 @@ for (let i = 0; i < points.length; i++) {
 
 const lines = [];
 
-for (let i = 0; i <= seg; i++) {
+for (let i = 0; i <= rotateSeg; i++) {
     const newPoints = [];
-    const p = i / seg;
+    const p = i / rotateSeg;
     const t = start + (end - start) * p;
     let rotateMatrix = util.createRotateMatrix(axis, t, 'y');
     for (let j = 0; j < points.length; j++) {
@@ -126,7 +127,7 @@ const fragmentShader = `
         vec3 halfVector = normalize(light_dir + camera_dir);
         
         float r = length(v_surfaceToLight);
-        float kd = 1.2; //漫反射系数
+        float kd = 1.2; //a
         float ks = 1.; // 高光系数
         float ka = 0.1; // 环境光系数
         vec3 kColor = vec3(0.5, 0.5, 0.5);
@@ -205,7 +206,7 @@ let uniforms = {
         .multiple(new Matrix(3).createRotateMatrix3(rotateY, 'y'))
         .multiple(new Matrix(3).createRotateMatrix3(rotateZ, 'z'))
         .transpose().matrix,
-    u_lightPosition: [-300, 300, 300],
+    u_lightPosition: [0, 0, 100],
     u_intensity: 100000,
 }
 
@@ -219,7 +220,6 @@ let attribs = {
         numComponents: 3
     }
 }
-gl.vertexAttribPointer()
 
 function draw() {
     uniforms.u_rotateX = util.createRotateMatrix(axis, rotateX, 'x'),
@@ -232,7 +232,7 @@ function draw() {
     util.setAttributes(attributeSetters, attribs);
     util.setUniforms(uniformSetters, uniforms);
     // gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.POINTS, 0, vertexPoints.length / 4);
+    gl.drawArrays(gl.TRIANGLES, 0, vertexPoints.length / 4);
 }
 
 const rotateXSlider = new Slider({
