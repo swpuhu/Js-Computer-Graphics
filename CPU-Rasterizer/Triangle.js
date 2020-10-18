@@ -43,11 +43,11 @@ export class Triangle {
      * @param {number} g green
      * @param {number} b blue
      */
-    setColor(ind, r, g, b) {
+    setColor(ind, r, g, b, a) {
         if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
             throw new Error("ERROR! Invalid color values.");
         }
-        this.color[ind] = [r / 255, g / 255, b / 255];
+        this.color[ind] = [r / 255, g / 255, b / 255, a];
     }
 
     getColor(alpha, beta, gamma, zReciprocal, correctPerspective = true) {

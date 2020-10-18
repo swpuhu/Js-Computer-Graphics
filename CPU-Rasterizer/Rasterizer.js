@@ -88,7 +88,7 @@ export class Rasterizer {
         const c2 = v2.cross(pv2);
         const c3 = v3.cross(pv3);
         return (
-            (c1 >= 0 && c2 >= 0 && c3 >= 0) || (c1 <= 0 && c2 <= 0 && c3 <= 0)
+            (c1 > 0 && c2 > 0 && c3 > 0) || (c1 < 0 && c2 < 0 && c3 < 0) || (c1 * c2 * c3 === 0)
         );
     }
 
@@ -183,9 +183,9 @@ export class Rasterizer {
             t.setVertex(1, v[1]);
             t.setVertex(2, v[2]);
 
-            t.setColor(0, col[index[0]][0], col[index[0]][1], col[index[0]][2]);
-            t.setColor(1, col[index[1]][0], col[index[1]][1], col[index[1]][2]);
-            t.setColor(2, col[index[2]][0], col[index[2]][1], col[index[2]][2]);
+            t.setColor(0, col[index[0]][0], col[index[0]][1], col[index[0]][2], col[index[0]][3] || 255);
+            t.setColor(1, col[index[1]][0], col[index[1]][1], col[index[1]][2], col[index[1]][3] || 255);
+            t.setColor(2, col[index[2]][0], col[index[2]][1], col[index[2]][2], col[index[2]][3] || 255);
 
             this._rasterizeTriangle(t, true, 3);
         }
@@ -221,10 +221,28 @@ export class Rasterizer {
      */
     setPixel(point, color) {
         let ind = (this._height - 1 - point[1]) * this._width + point[0];
-        if (point[2] < this._zBuffer[ind]) {
+        if (point[2] <= this._zBuffer[ind]) {
             this._zBuffer[ind] = point[2];
-            this._frameBuf[ind] = color;
+            this._frameBuf[ind] = this._blendColor(color, this._frameBuf[ind]);
+        } else {
+            this._frameBuf[ind] = this._blendColor(this._frameBuf[ind], color);
         }
+    }
+    /**
+     * 
+     * @param {number[]} srcColor 
+     * @param {number[]} dstColor 
+     */
+    _blendColor(srcColor, dstColor) {
+        const srcAlpha = srcColor[3] / 255;
+        const dstAlpha = (dstColor[3] || 0) / 255;
+        const res = [];
+        const alpha = 1 - (1 - srcAlpha) * (1 - dstAlpha);
+        for (let i = 0; i < 3; i++) {
+            res.push(srcAlpha * srcColor[i] + (1 - srcAlpha) * dstColor[i]);
+        }
+        res.push(alpha * 255);
+        return res;
     }
 
     clear(buff) {
@@ -261,7 +279,7 @@ export class Rasterizer {
      *
      * @param {Triangle} t
      */
-    _rasterizeTriangle(t, msaa = false, msaaNum = 3) {
+    _rasterizeTriangle(t, msaa = false, msaaNum = 1) {
         const p1 = t.v[0];
 
         let xMin, xMax, yMin, yMax;
@@ -314,8 +332,8 @@ export class Rasterizer {
                         zReciprocal,
                         true
                     );
-                    for (let _y = -half; _y <= half; _y++) {
-                        for (let _x = -half; _x <= half; _x++) {
+                    for (let _y = 0; _y < msaaNum; _y++) {
+                        for (let _x = 0; _x < msaaNum; _x++) {
                             const __x = x + _x / msaaNum;
                             const __y = y + _y / msaaNum;
                             if (this.insideTriangle(__x, __y, t.v)) {
@@ -325,8 +343,9 @@ export class Rasterizer {
                     }
                     const weight = sum / total;
                     if (weight > 0) {
-                        color = color.map(item => item * weight);
-                        this.setPixel([x, y, 1 / zReciprocal], color);
+                        color.push(weight * 255);
+                        let z = 1 / zReciprocal;
+                        this.setPixel([x, y, z], color);
                     }
                     
                 } else {
