@@ -15,6 +15,8 @@ export class Transformer {
         this.rotateDegree = 0;
         this.scaleX = 1;
         this.scaleY = 1;
+        this.width = this.element.offsetWidth;
+        this.height = this.element.offsetHeight;
         this.tx = 0;
         this.ty = 0;
         this.matrix = [1, 0, 0, 1, 0, 0];
@@ -37,7 +39,7 @@ export class Transformer {
         this.ctrlR.style.cssText = `position: absolute; background: #f60; width: 10px; height: 10px;right: 0; top: 50%; transform: translate(50%, -50%)`;
         this.ctrlT.style.cssText = `position: absolute; background: #f60; width: 10px; height: 10px;left: 50%; top: 0; transform: translate(-50%, -50%)`;
         this.ctrlB.style.cssText = `position: absolute; background: #f60; width: 10px; height: 10px;left: 50%; bottom: 0; transform: translate(-50%, 50%)`;
-        this.rotate.style.cssText = `position: absolute; background: #0f6; width: 10px; height: 10px; border-radius: 50%; left: 50%; top: 25%; transform: translate(-50%, 0)`;
+        this.rotate.style.cssText = `position: absolute; background: #0f6; width: 10px; height: 10px; border-radius: 50%; left: 50%; top: -25px; transform: translate(-50%, 0)`;
         this.ctrlLT.style.cssText = `position: absolute; background: #f60; width: 10px; height: 10px; left: 0; top: 0; transform: translate(-50%, -50%)`;
         this.ctrlRT.style.cssText = `position: absolute; background: #f60; width: 10px; height: 10px; right: 0; top: 0; transform: translate(50%, -50%)`;
         this.ctrlLB.style.cssText = `position: absolute; background: #f60; width: 10px; height: 10px; left: 0; bottom: 0; transform: translate(-50%, 50%)`;
@@ -79,56 +81,123 @@ export class Transformer {
     }
 
     setMatrix(matrix) {
-        this.matrix = matrix;
-        this.root.style.transform = this.element.style.transform = `matrix(${matrix.join(
-            ","
-        )})`;
+        if (!matrix) {
+            throw new Error("invalid matrix");
+        }
+        let params;
+        [this.matrix, params] = matrix;
+        this.element.style.transform = `matrix(${this.matrix.join(",")})`;
+        const sx = params[2];
+        const sy = params[3];
+        this.root.style.width = this.width * sx + "px";
+        this.root.style.height = this.height * sy + "px";
+        const correctX = (this.width * (sx - 1)) / 2;
+        const correntY = (this.height * (sy - 1)) / 2;
+        this.root.style.transform = `translate(${params[0] - correctX}px, ${
+            params[1] - correntY
+        }px) rotate(${params[4]}deg)`;
     }
 
     addEvent() {
         this.addMoveEvent(this.root);
         this.addRotateEvent(this.rotate, this.element);
-        this.addScaleEvent(this.ctrlL, this.element, (prevMatrix, vec) => {
+        this.addScaleEvent(this.ctrlL, this.element, (prevMatrix, vecH) => {
             const currentPos = this.computePos(prevMatrix);
-            const directionVec = new Vec2(1, 0)
-                .rotate(this.rotateDegree)
-                .normalize();
-            vec = directionVec.scalarMulti(directionVec.dot(vec));
-            currentPos[0][0] += vec.x;
-            currentPos[3][0] += vec.x;
-            currentPos[0][1] += vec.y;
-            currentPos[3][1] += vec.y;
-
-            const newMatrix = computeMatrixByPos(currentPos, this.position);
-            this.setMatrix(newMatrix);
-        });
-        this.addScaleEvent(this.ctrlR, this.element);
-        this.addScaleEvent(this.ctrlT, this.element);
-        this.addScaleEvent(this.ctrlB, this.element);
-        this.addScaleEvent(this.ctrlLT, this.element, (prevMatrix, vec) => {
-            const currentPos = this.computePos(prevMatrix);
-            const directionVecH = new Vec2(1, 0)
-                .rotate(this.rotateDegree)
-                .normalize();
-            const directionVecV = new Vec2(0, 1)
-                .rotate(this.rotateDegree)
-                .normalize();
-            const vecH = directionVecH.scalarMulti(directionVecH.dot(vec));
-            const vecV = directionVecV.scalarMulti(directionVecH.cross(vec));
-
-            currentPos[0][0] += vecH.x + vecV.x;
-            currentPos[0][1] += vecH.y + vecV.y;
-            currentPos[1][0] += vecV.x;
-            currentPos[1][1] += vecV.y;
+            currentPos[0][0] += vecH.x;
             currentPos[3][0] += vecH.x;
+            currentPos[0][1] += vecH.y;
             currentPos[3][1] += vecH.y;
-
-            const newMatrix = computeMatrixByPos(currentPos, this.position);
-            this.setMatrix(newMatrix);
+            return computeMatrixByPos(currentPos, this.position);
         });
-        this.addScaleEvent(this.ctrlRT, this.element);
-        this.addScaleEvent(this.ctrlLB, this.element);
-        this.addScaleEvent(this.ctrlRB, this.element);
+        this.addScaleEvent(this.ctrlR, this.element, (prevMatrix, vecH) => {
+            const currentPos = this.computePos(prevMatrix);
+            currentPos[1][0] += vecH.x;
+            currentPos[1][1] += vecH.y;
+
+            currentPos[2][0] += vecH.x;
+            currentPos[2][1] += vecH.y;
+            return computeMatrixByPos(currentPos, this.position);
+        });
+        this.addScaleEvent(
+            this.ctrlT,
+            this.element,
+            (prevMatrix, vecH, vecV) => {
+                const currentPos = this.computePos(prevMatrix);
+                currentPos[0][0] += vecV.x;
+                currentPos[0][1] += vecV.y;
+                currentPos[1][0] += vecV.x;
+                currentPos[1][1] += vecV.y;
+                return computeMatrixByPos(currentPos, this.position);
+            }
+        );
+        this.addScaleEvent(
+            this.ctrlB,
+            this.element,
+            (prevMatrix, vecH, vecV) => {
+                const currentPos = this.computePos(prevMatrix);
+                currentPos[2][0] += vecV.x;
+                currentPos[2][1] += vecV.y;
+                currentPos[3][0] += vecV.x;
+                currentPos[3][1] += vecV.y;
+                return computeMatrixByPos(currentPos, this.position);
+            }
+        );
+        this.addScaleEvent(
+            this.ctrlLT,
+            this.element,
+            (prevMatrix, vecH, vecV) => {
+                const currentPos = this.computePos(prevMatrix);
+                currentPos[0][0] += vecH.x + vecV.x;
+                currentPos[0][1] += vecH.y + vecV.y;
+                currentPos[1][0] += vecV.x;
+                currentPos[1][1] += vecV.y;
+                currentPos[3][0] += vecH.x;
+                currentPos[3][1] += vecH.y;
+                return computeMatrixByPos(currentPos, this.position);
+            }
+        );
+        this.addScaleEvent(
+            this.ctrlRT,
+            this.element,
+            (prevMatrix, vecH, vecV) => {
+                const currentPos = this.computePos(prevMatrix);
+                currentPos[1][0] += vecH.x + vecV.x;
+                currentPos[1][1] += vecH.y + vecV.y;
+                currentPos[0][0] += vecV.x;
+                currentPos[0][1] += vecV.y;
+                currentPos[2][0] += vecH.x;
+                currentPos[2][1] += vecH.y;
+                return computeMatrixByPos(currentPos, this.position);
+            }
+        );
+        this.addScaleEvent(
+            this.ctrlLB,
+            this.element,
+            (prevMatrix, vecH, vecV) => {
+                const currentPos = this.computePos(prevMatrix);
+                currentPos[3][0] += vecH.x + vecV.x;
+                currentPos[3][1] += vecH.y + vecV.y;
+                currentPos[2][0] += vecV.x;
+                currentPos[2][1] += vecV.y;
+                currentPos[0][0] += vecH.x;
+                currentPos[0][1] += vecH.y;
+                return computeMatrixByPos(currentPos, this.position);
+            }
+        );
+        this.addScaleEvent(
+            this.ctrlRB,
+            this.element,
+            (prevMatrix, vecH, vecV) => {
+                const currentPos = this.computePos(prevMatrix);
+                currentPos[2][0] += vecH.x + vecV.x;
+                currentPos[2][1] += vecH.y + vecV.y;
+                currentPos[3][0] += vecV.x;
+                currentPos[3][1] += vecV.y;
+                currentPos[1][0] += vecH.x;
+                currentPos[1][1] += vecH.y;
+                return computeMatrixByPos(currentPos, this.position);
+            }
+        );
     }
 
     addMoveEvent(ele) {
@@ -193,7 +262,10 @@ export class Transformer {
                 );
 
                 const newMatrix = getMatrix2(tx, ty, sx, sy, this.rotateDegree);
-                this.setMatrix(newMatrix);
+                this.setMatrix([
+                    newMatrix,
+                    [tx, ty, sx, sy, this.rotateDegree],
+                ]);
             };
             document.onmouseup = () => {
                 document.onmousemove = null;
@@ -216,11 +288,23 @@ export class Transformer {
                 .normalize();
             const matrix = [...this.matrix];
             document.onmousemove = (ev) => {
-                const moveVector = new Vec2(
+                const vec = new Vec2(
                     ev.clientX - e.clientX,
                     ev.clientY - e.clientY
                 );
-                callback(matrix, moveVector);
+
+                const directionVecH = new Vec2(1, 0)
+                    .rotate(this.rotateDegree)
+                    .normalize();
+                const directionVecV = new Vec2(0, 1)
+                    .rotate(this.rotateDegree)
+                    .normalize();
+                const vecH = directionVecH.scalarMulti(directionVecH.dot(vec));
+                const vecV = directionVecV.scalarMulti(
+                    directionVecH.cross(vec)
+                );
+                const newMatrix = callback(matrix, vecH, vecV);
+                this.setMatrix(newMatrix);
             };
 
             document.onmouseup = () => {

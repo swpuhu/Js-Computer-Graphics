@@ -95,5 +95,8 @@ export function computeMatrixByPos(targetPos, sourcePos) {
     const tx = x_ - Math.cos(rotate) * sx * x + Math.sin(rotate) * sy * y;
     const ty = y_ - Math.sin(rotate) * sx * x - Math.cos(rotate) * sy * y;
 
-    return getMatrix2(tx, ty, sx, sy, (rotate * 180) / Math.PI);
+    return [
+        getMatrix2(tx, ty, sx, sy, (rotate * 180) / Math.PI),
+        [tx, ty, sx, sy, (rotate * 180) / Math.PI],
+    ];
 }
