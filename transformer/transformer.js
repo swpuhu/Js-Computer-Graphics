@@ -101,16 +101,14 @@ export class Transformer {
     addEvent() {
         this.addMoveEvent(this.root);
         this.addRotateEvent(this.rotate, this.element);
-        this.addScaleEvent(this.ctrlL, this.element, (prevMatrix, vecH) => {
-            const currentPos = this.computePos(prevMatrix);
+        this.addScaleEvent(this.ctrlL, this.element, (currentPos, vecH) => {
             currentPos[0][0] += vecH.x;
             currentPos[3][0] += vecH.x;
             currentPos[0][1] += vecH.y;
             currentPos[3][1] += vecH.y;
             return computeMatrixByPos(currentPos, this.position);
         });
-        this.addScaleEvent(this.ctrlR, this.element, (prevMatrix, vecH) => {
-            const currentPos = this.computePos(prevMatrix);
+        this.addScaleEvent(this.ctrlR, this.element, (currentPos, vecH) => {
             currentPos[1][0] += vecH.x;
             currentPos[1][1] += vecH.y;
 
@@ -121,8 +119,7 @@ export class Transformer {
         this.addScaleEvent(
             this.ctrlT,
             this.element,
-            (prevMatrix, vecH, vecV) => {
-                const currentPos = this.computePos(prevMatrix);
+            (currentPos, vecH, vecV) => {
                 currentPos[0][0] += vecV.x;
                 currentPos[0][1] += vecV.y;
                 currentPos[1][0] += vecV.x;
@@ -133,8 +130,7 @@ export class Transformer {
         this.addScaleEvent(
             this.ctrlB,
             this.element,
-            (prevMatrix, vecH, vecV) => {
-                const currentPos = this.computePos(prevMatrix);
+            (currentPos, vecH, vecV) => {
                 currentPos[2][0] += vecV.x;
                 currentPos[2][1] += vecV.y;
                 currentPos[3][0] += vecV.x;
@@ -145,8 +141,7 @@ export class Transformer {
         this.addScaleEvent(
             this.ctrlLT,
             this.element,
-            (prevMatrix, vecH, vecV) => {
-                const currentPos = this.computePos(prevMatrix);
+            (currentPos, vecH, vecV) => {
                 currentPos[0][0] += vecH.x + vecV.x;
                 currentPos[0][1] += vecH.y + vecV.y;
                 currentPos[1][0] += vecV.x;
@@ -159,8 +154,7 @@ export class Transformer {
         this.addScaleEvent(
             this.ctrlRT,
             this.element,
-            (prevMatrix, vecH, vecV) => {
-                const currentPos = this.computePos(prevMatrix);
+            (currentPos, vecH, vecV) => {
                 currentPos[1][0] += vecH.x + vecV.x;
                 currentPos[1][1] += vecH.y + vecV.y;
                 currentPos[0][0] += vecV.x;
@@ -173,8 +167,7 @@ export class Transformer {
         this.addScaleEvent(
             this.ctrlLB,
             this.element,
-            (prevMatrix, vecH, vecV) => {
-                const currentPos = this.computePos(prevMatrix);
+            (currentPos, vecH, vecV) => {
                 currentPos[3][0] += vecH.x + vecV.x;
                 currentPos[3][1] += vecH.y + vecV.y;
                 currentPos[2][0] += vecV.x;
@@ -187,8 +180,7 @@ export class Transformer {
         this.addScaleEvent(
             this.ctrlRB,
             this.element,
-            (prevMatrix, vecH, vecV) => {
-                const currentPos = this.computePos(prevMatrix);
+            (currentPos, vecH, vecV) => {
                 currentPos[2][0] += vecH.x + vecV.x;
                 currentPos[2][1] += vecH.y + vecV.y;
                 currentPos[3][0] += vecV.x;
