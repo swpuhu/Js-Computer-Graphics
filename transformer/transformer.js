@@ -93,6 +93,11 @@ export class Transformer {
         this.root.style.height = this.height * sy + "px";
         const correctX = (this.width * (sx - 1)) / 2;
         const correntY = (this.height * (sy - 1)) / 2;
+        this.rotateDegree = params[4];
+        this.sx = sx;
+        this.sy = sy;
+        this.tx = params[0];
+        this.ty = params[1];
         this.root.style.transform = `translate(${params[0] - correctX}px, ${
             params[1] - correntY
         }px) rotate(${params[4]}deg)`;
@@ -235,6 +240,10 @@ export class Transformer {
                 (newPos[0][1] + newPos[2][1]) / 2 +
                     (this.position[3][1] - this.position[0][1]) / 2
             );
+            const sx = this.sx;
+            const sy = this.sy;
+            const tx = this.tx;
+            const ty = this.ty;
             const vec = new Vec2(e.clientX, e.clientY).sub(center).normalize();
 
             document.onmousemove = (ev) => {
@@ -249,9 +258,6 @@ export class Transformer {
                 }
                 theta = Math.floor(theta);
                 this.rotateDegree = (rotate + theta) % 360;
-                const [rotateDegree, sx, sy, tx, ty] = getScaleRotate(
-                    prevMatrix
-                );
 
                 const newMatrix = getMatrix2(tx, ty, sx, sy, this.rotateDegree);
                 this.setMatrix([
@@ -305,36 +311,6 @@ export class Transformer {
                 document.onmouseup = null;
             };
         };
-    }
-
-    computeMatrix(matrix) {
-        if (matrix) {
-            this.matrix = matrix;
-            [this.rotateDegree, this.sx, this.sy] = getScaleRotate([
-                matrix[0],
-                matrix[2],
-                matrix[4],
-                matrix[1],
-                matrix[3],
-                matrix[5],
-                0,
-                0,
-                1,
-            ]);
-            this.tx = matrix[4];
-            this.ty = matrix[5];
-        } else {
-            this.matrix = getMatrix2(
-                this.tx,
-                this.ty,
-                this.scaleX,
-                this.scaleY,
-                this.rotateDegree
-            );
-        }
-        this.root.style.transform = this.element.style.transform = `matrix(${this.matrix.join(
-            ","
-        )})`;
     }
 
     computePos(matrix) {
