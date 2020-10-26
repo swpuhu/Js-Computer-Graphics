@@ -303,7 +303,8 @@ export class Transformer {
                 const vecV = directionVecV.scalarMulti(
                     directionVecH.cross(vec)
                 );
-                const newMatrix = callback(matrix, vecH, vecV);
+                const currentPos = this.computePos(matrix);
+                const newMatrix = callback(currentPos, vecH, vecV);
                 this.setMatrix(newMatrix);
             };
 

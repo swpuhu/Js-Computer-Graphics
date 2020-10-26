@@ -1,8 +1,8 @@
 export class Matrix {
     /**
-     * 
+     *
      * @param {number} size
-     * @param {number[]} matrix 
+     * @param {number[]} matrix
      */
     constructor(size = 4, matrix) {
         this.size = size;
@@ -15,7 +15,6 @@ export class Matrix {
             this.matrix = new Array(this.size ** 2).fill(0);
             this.identity();
         }
-
     }
 
     identity() {
@@ -27,31 +26,38 @@ export class Matrix {
         return this;
     }
 
-
     transpose() {
         for (let y = 0; y < this.size; y++) {
             for (let x = 0; x < y; x++) {
-                [this.matrix[y * this.size + x], this.matrix[x * this.size + y]] = [this.matrix[x * this.size + y], this.matrix[y * this.size + x]];
+                [
+                    this.matrix[y * this.size + x],
+                    this.matrix[x * this.size + y],
+                ] = [
+                    this.matrix[x * this.size + y],
+                    this.matrix[y * this.size + x],
+                ];
             }
         }
         return this;
     }
 
     /**
-     * 
-     * @param {Matrix} m1 
-     * @param {Matrix} m2 
+     *
+     * @param {Matrix} m1
+     * @param {Matrix} m2
      */
     multiple(m2) {
         if (this.size !== m2.size) {
-            throw new Error('matrix\'s size must be same!');
+            throw new Error("matrix's size must be same!");
         }
         let res = [];
         for (let y = 0; y < this.size; y++) {
             for (let x = 0; x < this.size; x++) {
                 let sum = 0;
                 for (let k = 0; k < this.size; k++) {
-                    sum += this.matrix[y * this.size + k] * m2.matrix[k * this.size + x];
+                    sum +=
+                        this.matrix[y * this.size + k] *
+                        m2.matrix[k * this.size + x];
                 }
                 res.push(sum);
             }
@@ -60,12 +66,15 @@ export class Matrix {
     }
 
     /**
-     * 
-     * @param {number[]} v 
+     *
+     * @param {number[]} v
      */
     multiVec(v) {
         if (v.length !== this.size) {
-            throw new Error('vector\'s dimension must be same with matrix!, this matrix dimension is ' + this.size);
+            throw new Error(
+                "vector's dimension must be same with matrix!, this matrix dimension is " +
+                    this.size
+            );
         }
         const res = [];
         for (let y = 0; y < this.size; y++) {
@@ -78,33 +87,75 @@ export class Matrix {
         return res;
     }
 
+    copy() {
+        const newMatrix = new Matrix(this.size);
+        newMatrix.matrix = [...this.matrix];
+        return newMatrix;
+    }
+
     createRotateMatrix(rotate, axis) {
-        let cos = Math.cos(rotate * Math.PI / 180);
-        let sin = Math.sin(rotate * Math.PI / 180);
+        let cos = Math.cos((rotate * Math.PI) / 180);
+        let sin = Math.sin((rotate * Math.PI) / 180);
         let ret;
         switch (axis) {
-            case 'x':
+            case "x":
                 ret = new Float32Array([
-                    1.0, 0.0, 0.0, 0.0,
-                    0.0, cos, -sin, 0.0,
-                    0.0, sin, cos, 0.0,
-                    0, 0, 0, 1
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    cos,
+                    -sin,
+                    0.0,
+                    0.0,
+                    sin,
+                    cos,
+                    0.0,
+                    0,
+                    0,
+                    0,
+                    1,
                 ]);
                 break;
-            case 'y':
+            case "y":
                 ret = new Float32Array([
-                    cos, 0.0, -sin, 0.0,
-                    0.0, 1.0, 0.0, 0.0,
-                    sin, 0.0, cos, 0.0,
-                    0, 0, 0, 1
+                    cos,
+                    0.0,
+                    -sin,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    sin,
+                    0.0,
+                    cos,
+                    0.0,
+                    0,
+                    0,
+                    0,
+                    1,
                 ]);
                 break;
             default:
                 ret = new Float32Array([
-                    cos, -sin, 0.0, 0.0,
-                    sin, cos, 0.0, 0.0,
-                    0.0, 0.0, 1.0, 0.0,
-                    0, 0, 0, 1
+                    cos,
+                    -sin,
+                    0.0,
+                    0.0,
+                    sin,
+                    cos,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0,
+                    0,
+                    0,
+                    1,
                 ]);
         }
         this.matrix = ret;
@@ -112,40 +163,52 @@ export class Matrix {
     }
 
     createScaleMatrix(sx, sy, sz) {
-        this.matrix = [
-            sx, 0, 0, 0,
-            0, sy, 0, 0,
-            0, 0, sz, 0,
-            0, 0, 0, 1
-        ];
+        this.matrix = [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1];
         return this;
     }
 
-
     createRotateMatrix3(rotate, axis) {
-        let cos = Math.cos(rotate * Math.PI / 180);
-        let sin = Math.sin(rotate * Math.PI / 180);
+        let cos = Math.cos((rotate * Math.PI) / 180);
+        let sin = Math.sin((rotate * Math.PI) / 180);
         let ret;
         switch (axis) {
-            case 'x':
+            case "x":
                 ret = new Float32Array([
-                    1.0, 0.0, 0.0,
-                    0.0, cos, -sin,
-                    0.0, sin, cos,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    cos,
+                    -sin,
+                    0.0,
+                    sin,
+                    cos,
                 ]);
                 break;
-            case 'y':
+            case "y":
                 ret = new Float32Array([
-                    cos, 0.0, -sin,
-                    0.0, 1.0, 0.0,
-                    sin, 0.0, cos,
+                    cos,
+                    0.0,
+                    -sin,
+                    0.0,
+                    1.0,
+                    0.0,
+                    sin,
+                    0.0,
+                    cos,
                 ]);
                 break;
             default:
                 ret = new Float32Array([
-                    cos, -sin, 0.0,
-                    sin, cos, 0.0, 
-                    0.0, 0.0, 1.0, 
+                    cos,
+                    -sin,
+                    0.0,
+                    sin,
+                    cos,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
                 ]);
         }
         this.matrix = ret;
@@ -153,52 +216,106 @@ export class Matrix {
     }
 
     createScaleMatrix3(sx, sy, sz) {
-        this.matrix = [
-            sx, 0, 0,
-            0, sy, 0,
-            0, 0, sz,
-        ];
+        this.matrix = [sx, 0, 0, 0, sy, 0, 0, 0, sz];
         return this;
     }
 
     createTranslateMatrix(tx, ty, tz) {
-        this.matrix = [
-            1, 0, 0, tx,
-            0, 1, 0, ty,
-            0, 0, 1, tz,
-            0, 0, 0, 1
-        ];
+        this.matrix = [1, 0, 0, tx, 0, 1, 0, ty, 0, 0, 1, tz, 0, 0, 0, 1];
         return this;
     }
 
-
     createPerspectiveMatrix(near, far, Ox = 0, Oy = 0) {
         this.matrix = [
-            near, 0, Ox, -near * Ox,
-            0, near, Oy, -near * Oy,
-            0, 0, near + far, -near * far,
-            0, 0, 1, 0
+            near,
+            0,
+            Ox,
+            -near * Ox,
+            0,
+            near,
+            Oy,
+            -near * Oy,
+            0,
+            0,
+            near + far,
+            -near * far,
+            0,
+            0,
+            1,
+            0,
         ];
         return this;
     }
 
     createOrthographMatrix(l, r, t, b, n, f) {
         this.matrix = [
-            2 / (r - l), 0, 0, (l + r) / (l - r),
-            0, 2 / (t - b), 0, (t + b) / (b - t),
-            0, 0, 2 / (f - n), (n + f) / (n - f),
-            0, 0, 0, 1,
-        ]
+            2 / (r - l),
+            0,
+            0,
+            (l + r) / (l - r),
+            0,
+            2 / (t - b),
+            0,
+            (t + b) / (b - t),
+            0,
+            0,
+            2 / (f - n),
+            (n + f) / (n - f),
+            0,
+            0,
+            0,
+            1,
+        ];
         return this;
     }
 
-    createViewScaleMatrix (l, r, t, b, n, f) {
+    createViewScaleMatrix(l, r, t, b, n, f) {
         this.matrix = [
-            (r - l) / 2, 0, 0, (l + r) / 2,
-            0, (t - b) / 2, 0, (t + b) / 2,
-            0, 0, (f - n) / 2, (n + f) / 2,
-            0, 0, 0, 1
-        ]
+            (r - l) / 2,
+            0,
+            0,
+            (l + r) / 2,
+            0,
+            (t - b) / 2,
+            0,
+            (t + b) / 2,
+            0,
+            0,
+            (f - n) / 2,
+            (n + f) / 2,
+            0,
+            0,
+            0,
+            1,
+        ];
+        return this;
+    }
+
+    createMat3(tx, ty, sx, sy, rotate) {
+        const cos = Math.cos((rotate * Math.PI) / 180);
+        const sin = Math.sin((rotate * Math.PI) / 180);
+        const a = cos * sx;
+        const b = sin * sx;
+        const c = -sin * sy;
+        const d = cos * sy;
+        this.matrix = [a, c, tx, b, d, ty, 0, 0, 1];
+        return this;
+    }
+
+    createRotateMat3(rotate) {
+        const cos = Math.cos((rotate * Math.PI) / 180);
+        const sin = Math.sin((rotate * Math.PI) / 180);
+        this.matrix = [cos, -sin, 0, sin, cos, 0, 0, 0, 1];
+        return this;
+    }
+
+    createTranslateMat3(tx, ty) {
+        this.matrix = [1, 0, tx, 0, 1, ty, 0, 0, 1];
+        return this;
+    }
+
+    createScaleMat3(sx, sy) {
+        this.matrix = [sx, 0, 0, 0, sy, 0, 0, 0, 1];
         return this;
     }
 }
@@ -213,33 +330,42 @@ function normalize(v) {
     }
 }
 
-
 function cross(a, b) {
-    return [a[1] * b[2] - a[2] * b[1],
-    a[2] * b[0] - a[0] * b[2],
-    a[0] * b[1] - a[1] * b[0]
+    return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
     ];
-};
+}
 
 function subtractVectors(a, b) {
     return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
 
-
 export function lookAt(cameraPosition, target, up) {
-    var zAxis = normalize(
-        subtractVectors(target, cameraPosition));
+    var zAxis = normalize(subtractVectors(target, cameraPosition));
     var xAxis = normalize(cross(up, zAxis));
     var yAxis = normalize(cross(zAxis, xAxis));
 
     return [
-        xAxis[0], xAxis[1], xAxis[2], cameraPosition[0],
-        yAxis[0], yAxis[1], yAxis[2], cameraPosition[1],
-        zAxis[0], zAxis[1], zAxis[2], cameraPosition[2],
-        0, 0, 0, 1
+        xAxis[0],
+        xAxis[1],
+        xAxis[2],
+        cameraPosition[0],
+        yAxis[0],
+        yAxis[1],
+        yAxis[2],
+        cameraPosition[1],
+        zAxis[0],
+        zAxis[1],
+        zAxis[2],
+        cameraPosition[2],
+        0,
+        0,
+        0,
+        1,
     ];
 }
-
 
 export function inverse(m) {
     var m00 = m[0 * 4 + 0];
@@ -283,13 +409,25 @@ export function inverse(m) {
     var tmp_22 = m00 * m11;
     var tmp_23 = m10 * m01;
 
-    var t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
+    var t0 =
+        tmp_0 * m11 +
+        tmp_3 * m21 +
+        tmp_4 * m31 -
         (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
-    var t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
+    var t1 =
+        tmp_1 * m01 +
+        tmp_6 * m21 +
+        tmp_9 * m31 -
         (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-    var t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
+    var t2 =
+        tmp_2 * m01 +
+        tmp_7 * m11 +
+        tmp_10 * m31 -
         (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-    var t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
+    var t3 =
+        tmp_5 * m01 +
+        tmp_8 * m11 +
+        tmp_11 * m21 -
         (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
 
     var d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
@@ -299,29 +437,65 @@ export function inverse(m) {
         d * t1,
         d * t2,
         d * t3,
-        d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
-            (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),
-        d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
-            (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),
-        d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
-            (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),
-        d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
-            (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),
-        d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
-            (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),
-        d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
-            (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),
-        d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
-            (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),
-        d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
-            (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),
-        d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
-            (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),
-        d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
-            (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),
-        d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
-            (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),
-        d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
-            (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02))
+        d *
+            (tmp_1 * m10 +
+                tmp_2 * m20 +
+                tmp_5 * m30 -
+                (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),
+        d *
+            (tmp_0 * m00 +
+                tmp_7 * m20 +
+                tmp_8 * m30 -
+                (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),
+        d *
+            (tmp_3 * m00 +
+                tmp_6 * m10 +
+                tmp_11 * m30 -
+                (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),
+        d *
+            (tmp_4 * m00 +
+                tmp_9 * m10 +
+                tmp_10 * m20 -
+                (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),
+        d *
+            (tmp_12 * m13 +
+                tmp_15 * m23 +
+                tmp_16 * m33 -
+                (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),
+        d *
+            (tmp_13 * m03 +
+                tmp_18 * m23 +
+                tmp_21 * m33 -
+                (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),
+        d *
+            (tmp_14 * m03 +
+                tmp_19 * m13 +
+                tmp_22 * m33 -
+                (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),
+        d *
+            (tmp_17 * m03 +
+                tmp_20 * m13 +
+                tmp_23 * m23 -
+                (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),
+        d *
+            (tmp_14 * m22 +
+                tmp_17 * m32 +
+                tmp_13 * m12 -
+                (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),
+        d *
+            (tmp_20 * m32 +
+                tmp_12 * m02 +
+                tmp_19 * m22 -
+                (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),
+        d *
+            (tmp_18 * m12 +
+                tmp_23 * m32 +
+                tmp_15 * m02 -
+                (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),
+        d *
+            (tmp_22 * m22 +
+                tmp_16 * m02 +
+                tmp_21 * m12 -
+                (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02)),
     ];
-};
+}

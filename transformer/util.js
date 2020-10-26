@@ -21,19 +21,16 @@ export function getMatrix2(tx, ty, sx, sy, rotate) {
 export function getScaleRotate(matrix) {
     // 先旋转再缩放，反解
     let angle = Math.atan2(matrix[1], matrix[3]);
-    let sx = matrix[0] / Math.cos(angle);
-    let sy = matrix[1] / Math.sin(angle);
-    if (isNaN(sy)) {
-        sy = 1;
-    }
+    let sx = Math.hypot(matrix[0], matrix[2]);
+    let sy = Math.hypot(matrix[1], matrix[3]);
     const tx = matrix[4];
     const ty = matrix[5];
     const validSx = Math.sqrt(matrix[0] ** 2 + matrix[2] ** 2);
     if (Math.abs(validSx - Math.abs(sx)) > 1e-8) {
         // 先缩放再旋转，反解
         angle = Math.atan2(matrix[1], matrix[0]);
-        sx = matrix[0] / Math.cos(angle);
-        sy = matrix[3] / Math.cos(angle);
+        sx = Math.hypot(matrix[0], matrix[1]);
+        sy = Math.hypot(matrix[2], matrix[3]);
     }
     return [(angle * 180) / Math.PI, sx, sy, tx, ty];
 }
