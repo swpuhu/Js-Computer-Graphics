@@ -235,8 +235,8 @@ export class Transformer {
                 (newPos[0][1] + newPos[2][1]) / 2 +
                     (this.position[3][1] - this.position[0][1]) / 2
             );
+            const [rotateDegree, sx, sy, tx, ty] = getScaleRotate(prevMatrix);
             const vec = new Vec2(e.clientX, e.clientY).sub(center).normalize();
-
             document.onmousemove = (ev) => {
                 const moveV = new Vec2(ev.clientX, ev.clientY)
                     .sub(center)
@@ -249,9 +249,6 @@ export class Transformer {
                 }
                 theta = Math.floor(theta);
                 this.rotateDegree = (rotate + theta) % 360;
-                const [rotateDegree, sx, sy, tx, ty] = getScaleRotate(
-                    prevMatrix
-                );
 
                 const newMatrix = getMatrix2(tx, ty, sx, sy, this.rotateDegree);
                 this.setMatrix([
@@ -291,11 +288,17 @@ export class Transformer {
                 const directionVecV = new Vec2(0, 1)
                     .rotate(this.rotateDegree)
                     .normalize();
-                const vecH = directionVecH.scalarMulti(directionVecH.dot(vec));
-                const vecV = directionVecV.scalarMulti(
-                    directionVecH.cross(vec)
-                );
+                let vecH = directionVecH.scalarMulti(directionVecH.dot(vec));
+                let vecV = directionVecV.scalarMulti(directionVecH.cross(vec));
                 const currentPos = this.computePos(matrix);
+                const h = Math.hypot(
+                    currentPos[0][0] - currentPos[1][0],
+                    currentPos[0][1] - currentPos[1][1]
+                );
+                const v = Math.hypot(
+                    currentPos[0][0] - currentPos[3][0],
+                    currentPos[0][1] - currentPos[3][1]
+                );
                 const newMatrix = callback(currentPos, vecH, vecV);
                 this.setMatrix(newMatrix);
             };
@@ -305,36 +308,6 @@ export class Transformer {
                 document.onmouseup = null;
             };
         };
-    }
-
-    computeMatrix(matrix) {
-        if (matrix) {
-            this.matrix = matrix;
-            [this.rotateDegree, this.sx, this.sy] = getScaleRotate([
-                matrix[0],
-                matrix[2],
-                matrix[4],
-                matrix[1],
-                matrix[3],
-                matrix[5],
-                0,
-                0,
-                1,
-            ]);
-            this.tx = matrix[4];
-            this.ty = matrix[5];
-        } else {
-            this.matrix = getMatrix2(
-                this.tx,
-                this.ty,
-                this.scaleX,
-                this.scaleY,
-                this.rotateDegree
-            );
-        }
-        this.root.style.transform = this.element.style.transform = `matrix(${this.matrix.join(
-            ","
-        )})`;
     }
 
     computePos(matrix) {

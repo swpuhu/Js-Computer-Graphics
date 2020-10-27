@@ -59,4 +59,8 @@ export class Vec2 {
         this.y = y;
         return this;
     }
+
+    get length() {
+        return Math.hypot(this.x, this.y);
+    }
 }
