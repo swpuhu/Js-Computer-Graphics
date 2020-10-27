@@ -93,7 +93,7 @@ export class Node {
         }
         const worldMatrix = this.worldMatrix;
         this.children.forEach((child) => {
-            child.data.updateMatrix(worldMatrix);
+            child.updateMatrix(worldMatrix);
         });
     }
 

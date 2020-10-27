@@ -67,7 +67,7 @@ export class TreeNode {
         for (let node of treeNode) {
             this.children.push(node);
             this.root.appendChild(node.root);
-            this.data.addChildlren(node);
+            this.data.addChildlren(node.data);
         }
     }
 

@@ -126,7 +126,7 @@ function draw(ctx) {
 function recursiveDraw(ctx, node) {
     node.draw && node.draw(ctx);
     node.children.forEach((item) => {
-        recursiveDraw(ctx, item.data);
+        recursiveDraw(ctx, item);
     });
 }
 
