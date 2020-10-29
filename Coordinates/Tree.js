@@ -50,8 +50,8 @@ export class TreeNode {
             textNode.focus();
         };
 
-        textNode.onchange = function () {
-            this.data.name = this.textContent;
+        textNode.oninput = () => {
+            this.data.name = textNode.textContent;
         };
 
         textNode.onblur = function () {
