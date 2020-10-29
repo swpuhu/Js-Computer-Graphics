@@ -86,7 +86,6 @@ const contextMenu = new ContextMenu([
                 const node = new NNode();
                 const treeNode = new TreeNode(node, tree);
                 tree.selectedTreeNode.addChildren(treeNode);
-                console.log(tree);
             }
         },
         isActive: function () {
@@ -96,7 +95,10 @@ const contextMenu = new ContextMenu([
     {
         title: "删除节点",
         onClick: function () {
-            console.log("delete node");
+            if (tree.selectedTreeNode) {
+                tree.selectedTreeNode.remove();
+                draw(ctx);
+            }
         },
         isActive: function () {
             return true;

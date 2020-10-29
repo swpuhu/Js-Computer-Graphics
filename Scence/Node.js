@@ -101,6 +101,13 @@ export class Node {
         this.children.push(...children);
     }
 
+    remove() {
+        const index = this.parent.children.indexOf(this);
+        if (index > -1) {
+            this.parent.children.splice(index, 1);
+        }
+    }
+
     /**
      *
      * @param {CanvasRenderingContext2D} ctx
