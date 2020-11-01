@@ -499,3 +499,38 @@ export function inverse(m) {
                 (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02)),
     ];
 }
+
+function getMat3Determinate(m) {
+    return (
+        m[0] * (m[4] * m[8] - m[5] * m[7]) -
+        m[1] * (m[3] * m[8] - m[5] * m[6]) +
+        m[2] * (m[3] * m[7] - m[4] * m[6])
+    );
+}
+
+export function inverse3(m) {
+    const a = m[0 * 3 + 0];
+    const b = m[0 * 3 + 1];
+    const c = m[0 * 3 + 2];
+    const d = m[1 * 3 + 0];
+    const e = m[1 * 3 + 1];
+    const f = m[1 * 3 + 2];
+    const g = m[2 * 3 + 0];
+    const h = m[2 * 3 + 1];
+    const i = m[2 * 3 + 2];
+
+    const aStart = [
+        e * i - f * h,
+        c * h - b * i,
+        b * f - c * e,
+        f * g - d * i,
+        a * i - c * g,
+        c * d - a * f,
+        d * h - e * g,
+        b * g - a * h,
+        a * e - b * d,
+    ];
+
+    const det = getMat3Determinate(aStart);
+    return aStart.map((item) => item / det);
+}
