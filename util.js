@@ -17,13 +17,21 @@ export class Vec2 {
      * 
      * @param {Vec2} v 
      */
-    add (v) {
+    addSelf (v) {
         this.x += v.x;
         this.y += v.y;
         return this;
     }
 
-    rotate(rad) {
+    add(v) {
+        return new Vec2(this.x + v.x, this.y + v.y);
+    }
+
+    sub(v) {
+        return new Vec2(this.x - v.x, this.y - v.y);
+    }
+
+    rotateSelf(rad) {
         const c = Math.cos(rad);
         const s = Math.sin(rad);
         const {x, y} = this;
@@ -32,17 +40,33 @@ export class Vec2 {
         return this;
     }
 
-    scale(length) {
+    rotate(rad) {
+        const c = Math.cos(rad);
+        const s = Math.sin(rad);
+        const {x, y} = this;
+        return new Vec2(x * c + y * -s, x * s + y * c);
+    }
+
+    scaleSelf(length) {
         this.x *= length;
         this.y *= length;
         return this;
     }
 
-    normalize () {
+    scale(length) {
+        return new Vec2(this.x * length, this.y * length);
+    }
+
+    normalizeSelf () {
         const length = Math.hypot(this.x, this.y);
         this.x /= length;
         this.y /= length;
         return this;
+    }
+
+    normalize() {
+        const length = Math.hypot(this.x, this.y);
+        return new Vec2(this.x / length, this.y / length);    
     }
 
     /**
@@ -63,5 +87,10 @@ export class Vec2 {
 
     get dir () {
         return Math.atan2(this.y, this.x);
+    }
+
+
+    mag() {
+        return Math.sqrt(this.x ** 2 + this.y ** 2);
     }
 }
